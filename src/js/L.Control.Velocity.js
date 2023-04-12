@@ -148,11 +148,11 @@ L.Control.Velocity = L.Control.extend({
       gridValue[2]
     ) {
     var deg = self.vectorToDegrees(gridValue[0], gridValue[1], this.options.angleConvention);
-    var cardinal = this.options.showCardinal ? ` (${self.degreesToCardinalDirection(deg)}) ` : '';
+    var cardinal = this.options.showCardinal ? ` ${self.degreesToCardinalDirection(deg)} ` : '';
 
 		htmlOut = `<strong> ${this.options.velocityType} ${
 			this.options.directionString
-		}: </strong> ${deg.toFixed(2)}°${cardinal}, <strong> ${this.options.velocityType} ${
+		}: </strong> ${cardinal}, <strong> ${this.options.velocityType} ${
 			this.options.speedString
 		}: </strong> ${self
 			.vectorToSpeed(gridValue[0], gridValue[1], this.options.speedUnit)
