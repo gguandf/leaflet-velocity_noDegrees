@@ -11,10 +11,13 @@
 if (!L.DomUtil.setTransform) {
   L.DomUtil.setTransform = function (el, offset, scale) {
     var pos = offset || new L.Point(0, 0);
-    el.style[L.DomUtil.TRANSFORM] = (L.Browser.ie3d ? "translate(" + pos.x + "px," + pos.y + "px)" : "translate3d(" + pos.x + "px," + pos.y + "px,0)") + (scale ? " scale(" + scale + ")" : "");
+    el.style[L.DomUtil.TRANSFORM] =
+      (L.Browser.ie3d
+        ? "translate(" + pos.x + "px," + pos.y + "px)"
+        : "translate3d(" + pos.x + "px," + pos.y + "px,0)") +
+      (scale ? " scale(" + scale + ")" : "");
   };
 } // -- support for both  0.0.7 and 1.0.0 rc2 leaflet
-
 
 L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
   // -- initialized is called on prototype
@@ -52,7 +55,7 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
   getEvents: function getEvents() {
     var events = {
       resize: this._onLayerDidResize,
-      moveend: this._onLayerDidMove
+      moveend: this._onLayerDidMove,
     };
 
     if (this._map.options.zoomAnimation && L.Browser.any3d) {
@@ -72,7 +75,10 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
     this._canvas.width = size.x;
     this._canvas.height = size.y;
     var animated = this._map.options.zoomAnimation && L.Browser.any3d;
-    L.DomUtil.addClass(this._canvas, "leaflet-zoom-" + (animated ? "animated" : "hide"));
+    L.DomUtil.addClass(
+      this._canvas,
+      "leaflet-zoom-" + (animated ? "animated" : "hide")
+    );
     this.options.pane.appendChild(this._canvas);
     map.on(this.getEvents(), this);
     var del = this._delegate || this;
@@ -109,34 +115,49 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
 
     var center = this._map.options.crs.project(this._map.getCenter());
 
-    var corner = this._map.options.crs.project(this._map.containerPointToLatLng(this._map.getSize()));
+    var corner = this._map.options.crs.project(
+      this._map.containerPointToLatLng(this._map.getSize())
+    );
 
     var del = this._delegate || this;
-    del.onDrawLayer && del.onDrawLayer({
-      layer: this,
-      canvas: this._canvas,
-      bounds: bounds,
-      size: size,
-      zoom: zoom,
-      center: center,
-      corner: corner
-    });
+    del.onDrawLayer &&
+      del.onDrawLayer({
+        layer: this,
+        canvas: this._canvas,
+        bounds: bounds,
+        size: size,
+        zoom: zoom,
+        center: center,
+        corner: corner,
+      });
     this._frame = null;
   },
   // -- L.DomUtil.setTransform from leaflet 1.0.0 to work on 0.0.7
   //------------------------------------------------------------------------------
   _setTransform: function _setTransform(el, offset, scale) {
     var pos = offset || new L.Point(0, 0);
-    el.style[L.DomUtil.TRANSFORM] = (L.Browser.ie3d ? "translate(" + pos.x + "px," + pos.y + "px)" : "translate3d(" + pos.x + "px," + pos.y + "px,0)") + (scale ? " scale(" + scale + ")" : "");
+    el.style[L.DomUtil.TRANSFORM] =
+      (L.Browser.ie3d
+        ? "translate(" + pos.x + "px," + pos.y + "px)"
+        : "translate3d(" + pos.x + "px," + pos.y + "px,0)") +
+      (scale ? " scale(" + scale + ")" : "");
   },
   //------------------------------------------------------------------------------
   _animateZoom: function _animateZoom(e) {
     var scale = this._map.getZoomScale(e.zoom); // -- different calc of offset in leaflet 1.0.0 and 0.0.7 thanks for 1.0.0-rc2 calc @jduggan1
 
-
-    var offset = L.Layer ? this._map._latLngToNewLayerPoint(this._map.getBounds().getNorthWest(), e.zoom, e.center) : this._map._getCenterOffset(e.center)._multiplyBy(-scale).subtract(this._map._getMapPanePos());
+    var offset = L.Layer
+      ? this._map._latLngToNewLayerPoint(
+          this._map.getBounds().getNorthWest(),
+          e.zoom,
+          e.center
+        )
+      : this._map
+          ._getCenterOffset(e.center)
+          ._multiplyBy(-scale)
+          .subtract(this._map._getMapPanePos());
     L.DomUtil.setTransform(this._canvas, offset, scale);
-  }
+  },
 });
 
 L.canvasLayer = function (pane) {
@@ -151,24 +172,27 @@ L.Control.Velocity = L.Control.extend({
     // and 'CW' (angle value increases clock-wise) or 'CCW' (angle value increases counter clock-wise)
     angleConvention: "bearingCCW",
     showCardinal: false,
+    showDegrees: true,
     // Could be 'm/s' for meter per second, 'k/h' for kilometer per hour, 'mph' for miles per hour or 'kt' for knots
     speedUnit: "m/s",
     directionString: "Direction",
     speedString: "Speed",
     onAdd: null,
-    onRemove: null
+    onRemove: null,
   },
   onAdd: function onAdd(map) {
     this._container = L.DomUtil.create("div", "leaflet-control-velocity");
     L.DomEvent.disableClickPropagation(this._container);
     map.on("mousemove", this._onMouseMove, this);
     this._container.innerHTML = this.options.emptyString;
-    if (this.options.leafletVelocity.options.onAdd) this.options.leafletVelocity.options.onAdd();
+    if (this.options.leafletVelocity.options.onAdd)
+      this.options.leafletVelocity.options.onAdd();
     return this._container;
   },
   onRemove: function onRemove(map) {
     map.off("mousemove", this._onMouseMove, this);
-    if (this.options.leafletVelocity.options.onRemove) this.options.leafletVelocity.options.onRemove();
+    if (this.options.leafletVelocity.options.onRemove)
+      this.options.leafletVelocity.options.onRemove();
   },
   vectorToSpeed: function vectorToSpeed(uMs, vMs, unit) {
     var velocityAbs = Math.sqrt(Math.pow(uMs, 2) + Math.pow(vMs, 2)); // Default is m/s
@@ -187,12 +211,12 @@ L.Control.Velocity = L.Control.extend({
     // Default angle convention is CW
     if (angleConvention.endsWith("CCW")) {
       // vMs comes out upside-down..
-      vMs = vMs > 0 ? vMs = -vMs : Math.abs(vMs);
+      vMs = vMs > 0 ? (vMs = -vMs) : Math.abs(vMs);
     }
 
     var velocityAbs = Math.sqrt(Math.pow(uMs, 2) + Math.pow(vMs, 2));
     var velocityDir = Math.atan2(uMs / velocityAbs, vMs / velocityAbs);
-    var velocityDirToDegrees = velocityDir * 180 / Math.PI + 180;
+    var velocityDirToDegrees = (velocityDir * 180) / Math.PI + 180;
 
     if (angleConvention === "bearingCW" || angleConvention === "meteoCCW") {
       velocityDirToDegrees += 180;
@@ -202,40 +226,40 @@ L.Control.Velocity = L.Control.extend({
     return velocityDirToDegrees;
   },
   degreesToCardinalDirection: function degreesToCardinalDirection(deg) {
-    var cardinalDirection = '';
+    var cardinalDirection = "";
 
-    if (deg >= 0 && deg < 11.25 || deg >= 348.75) {
-      cardinalDirection = 'N';
+    if ((deg >= 0 && deg < 11.25) || deg >= 348.75) {
+      cardinalDirection = "N";
     } else if (deg >= 11.25 && deg < 33.75) {
-      cardinalDirection = 'NNW';
+      cardinalDirection = "NNW";
     } else if (deg >= 33.75 && deg < 56.25) {
-      cardinalDirection = 'NW';
+      cardinalDirection = "NW";
     } else if (deg >= 56.25 && deg < 78.75) {
-      cardinalDirection = 'WNW';
+      cardinalDirection = "WNW";
     } else if (deg >= 78.25 && deg < 101.25) {
-      cardinalDirection = 'W';
+      cardinalDirection = "W";
     } else if (deg >= 101.25 && deg < 123.75) {
-      cardinalDirection = 'WSW';
+      cardinalDirection = "WSW";
     } else if (deg >= 123.75 && deg < 146.25) {
-      cardinalDirection = 'SW';
+      cardinalDirection = "SW";
     } else if (deg >= 146.25 && deg < 168.75) {
-      cardinalDirection = 'SSW';
+      cardinalDirection = "SSW";
     } else if (deg >= 168.75 && deg < 191.25) {
-      cardinalDirection = 'S';
+      cardinalDirection = "S";
     } else if (deg >= 191.25 && deg < 213.75) {
-      cardinalDirection = 'SSE';
+      cardinalDirection = "SSO";
     } else if (deg >= 213.75 && deg < 236.25) {
-      cardinalDirection = 'SE';
+      cardinalDirection = "SO";
     } else if (deg >= 236.25 && deg < 258.75) {
-      cardinalDirection = 'ESE';
+      cardinalDirection = "OSO";
     } else if (deg >= 258.75 && deg < 281.25) {
-      cardinalDirection = 'E';
+      cardinalDirection = "O";
     } else if (deg >= 281.25 && deg < 303.75) {
-      cardinalDirection = 'ENE';
+      cardinalDirection = "ONO";
     } else if (deg >= 303.75 && deg < 326.25) {
-      cardinalDirection = 'NE';
+      cardinalDirection = "NO";
     } else if (deg >= 326.25 && deg < 348.75) {
-      cardinalDirection = 'NNE';
+      cardinalDirection = "NNO";
     }
 
     return cardinalDirection;
@@ -252,25 +276,58 @@ L.Control.Velocity = L.Control.extend({
   _onMouseMove: function _onMouseMove(e) {
     var self = this;
 
-    var pos = this.options.leafletVelocity._map.containerPointToLatLng(L.point(e.containerPoint.x, e.containerPoint.y));
+    var pos = this.options.leafletVelocity._map.containerPointToLatLng(
+      L.point(e.containerPoint.x, e.containerPoint.y)
+    );
 
-    var gridValue = this.options.leafletVelocity._windy.interpolatePoint(pos.lng, pos.lat);
+    var gridValue = this.options.leafletVelocity._windy.interpolatePoint(
+      pos.lng,
+      pos.lat
+    );
 
     var htmlOut = "";
 
-    if (gridValue && !isNaN(gridValue[0]) && !isNaN(gridValue[1]) && gridValue[2]) {
-      var deg = self.vectorToDegrees(gridValue[0], gridValue[1], this.options.angleConvention);
-      var cardinal = this.options.showCardinal ? " (".concat(self.degreesToCardinalDirection(deg), ") ") : '';
-      htmlOut = "<strong> ".concat(this.options.velocityType, " ").concat(this.options.directionString, ": </strong> ").concat(deg.toFixed(2), "\xB0").concat(cardinal, ", <strong> ").concat(this.options.velocityType, " ").concat(this.options.speedString, ": </strong> ").concat(self.vectorToSpeed(gridValue[0], gridValue[1], this.options.speedUnit).toFixed(2), " ").concat(this.options.speedUnit);
+    if (
+      gridValue &&
+      !isNaN(gridValue[0]) &&
+      !isNaN(gridValue[1]) &&
+      gridValue[2]
+    ) {
+      var deg = self.vectorToDegrees(
+        gridValue[0],
+        gridValue[1],
+        this.options.angleConvention
+      );
+
+      var cardinal = this.options.showCardinal
+        ? self.degreesToCardinalDirection(deg)
+        : "";
+
+      deg = this.options.showDegrees ? deg.toFixed(2).concat("\xB0") : "";
+
+      htmlOut = "<strong> "
+        .concat(this.options.velocityType, " ")
+        .concat(this.options.directionString, ": </strong> ")
+        .concat(deg)
+        .concat(cardinal, ", <strong> ")
+        .concat(this.options.velocityType, " ")
+        .concat(this.options.speedString, ": </strong> ")
+        .concat(
+          self
+            .vectorToSpeed(gridValue[0], gridValue[1], this.options.speedUnit)
+            .toFixed(2),
+          " "
+        )
+        .concat(this.options.speedUnit);
     } else {
       htmlOut = this.options.emptyString;
     }
 
     self._container.innerHTML = htmlOut;
-  }
+  },
 });
 L.Map.mergeOptions({
-  positionControl: false
+  positionControl: false,
 });
 L.Map.addInitHook(function () {
   if (this.options.positionControl) {
@@ -289,12 +346,12 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
     displayOptions: {
       velocityType: "Velocity",
       position: "bottomleft",
-      emptyString: "No velocity data"
+      emptyString: "No velocity data",
     },
     maxVelocity: 10,
     // used to align color scale
     colorScale: null,
-    data: null
+    data: null,
   },
   _map: null,
   _canvasLayer: null,
@@ -320,9 +377,8 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
       }
     } // create canvas, add to map pane
 
-
     this._canvasLayer = L.canvasLayer({
-      pane: pane
+      pane: pane,
     }).delegate(this);
 
     this._canvasLayer.addTo(map);
@@ -350,7 +406,10 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
     this.options = Object.assign(this.options, options);
 
     if (options.hasOwnProperty("displayOptions")) {
-      this.options.displayOptions = Object.assign(this.options.displayOptions, options.displayOptions);
+      this.options.displayOptions = Object.assign(
+        this.options.displayOptions,
+        options.displayOptions
+      );
 
       this._initMouseHandler(true);
     }
@@ -392,15 +451,28 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
 
     var size = this._map.getSize(); // bounds, width, height, extent
 
-
-    this._windy.start([[0, 0], [size.x, size.y]], size.x, size.y, [[bounds._southWest.lng, bounds._southWest.lat], [bounds._northEast.lng, bounds._northEast.lat]]);
+    this._windy.start(
+      [
+        [0, 0],
+        [size.x, size.y],
+      ],
+      size.x,
+      size.y,
+      [
+        [bounds._southWest.lng, bounds._southWest.lat],
+        [bounds._northEast.lng, bounds._northEast.lat],
+      ]
+    );
   },
   _initWindy: function _initWindy(self) {
     // windy object, copy options
-    var options = Object.assign({
-      canvas: self._canvasLayer._canvas,
-      map: this._map
-    }, self.options);
+    var options = Object.assign(
+      {
+        canvas: self._canvasLayer._canvas,
+        map: this._map,
+      },
+      self.options
+    );
     this._windy = new Windy(options); // prepare context global var, start drawing
 
     this._context = this._canvasLayer._canvas.getContext("2d");
@@ -451,7 +523,7 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
     this._windy = null;
 
     this._map.removeLayer(this._canvasLayer);
-  }
+  },
 });
 
 L.velocityLayer = function (options) {
@@ -469,13 +541,14 @@ L.velocityLayer = function (options) {
  interpolation and animation process.
  */
 
-
 var Windy = function Windy(params) {
   var MIN_VELOCITY_INTENSITY = params.minVelocity || 0; // velocity at which particle intensity is minimum (m/s)
 
   var MAX_VELOCITY_INTENSITY = params.maxVelocity || 10; // velocity at which particle intensity is maximum (m/s)
 
-  var VELOCITY_SCALE = (params.velocityScale || 0.005) * (Math.pow(window.devicePixelRatio, 1 / 3) || 1); // scale for wind velocity (completely arbitrary--this value looks nice)
+  var VELOCITY_SCALE =
+    (params.velocityScale || 0.005) *
+    (Math.pow(window.devicePixelRatio, 1 / 3) || 1); // scale for wind velocity (completely arbitrary--this value looks nice)
 
   var MAX_PARTICLE_AGE = params.particleAge || 90; // max number of frames a particle is drawn before regeneration
 
@@ -489,7 +562,23 @@ var Windy = function Windy(params) {
   var FRAME_TIME = 1000 / FRAME_RATE; // desired frames per second
 
   var OPACITY = 0.97;
-  var defaulColorScale = ["rgb(36,104, 180)", "rgb(60,157, 194)", "rgb(128,205,193 )", "rgb(151,218,168 )", "rgb(198,231,181)", "rgb(238,247,217)", "rgb(255,238,159)", "rgb(252,217,125)", "rgb(255,182,100)", "rgb(252,150,75)", "rgb(250,112,52)", "rgb(245,64,32)", "rgb(237,45,28)", "rgb(220,24,32)", "rgb(180,0,35)"];
+  var defaulColorScale = [
+    "rgb(36,104, 180)",
+    "rgb(60,157, 194)",
+    "rgb(128,205,193 )",
+    "rgb(151,218,168 )",
+    "rgb(198,231,181)",
+    "rgb(238,247,217)",
+    "rgb(255,238,159)",
+    "rgb(252,217,125)",
+    "rgb(255,182,100)",
+    "rgb(252,150,75)",
+    "rgb(250,112,52)",
+    "rgb(245,64,32)",
+    "rgb(237,45,28)",
+    "rgb(220,24,32)",
+    "rgb(180,0,35)",
+  ];
   var colorScale = params.colorScale || defaulColorScale;
   var NULL_WIND_VECTOR = [NaN, NaN, null]; // singleton for no wind in the form: [u, v, magnitude]
 
@@ -504,25 +593,39 @@ var Windy = function Windy(params) {
   };
 
   var setOptions = function setOptions(options) {
-    if (options.hasOwnProperty("minVelocity")) MIN_VELOCITY_INTENSITY = options.minVelocity;
-    if (options.hasOwnProperty("maxVelocity")) MAX_VELOCITY_INTENSITY = options.maxVelocity;
-    if (options.hasOwnProperty("velocityScale")) VELOCITY_SCALE = (options.velocityScale || 0.005) * (Math.pow(window.devicePixelRatio, 1 / 3) || 1);
-    if (options.hasOwnProperty("particleAge")) MAX_PARTICLE_AGE = options.particleAge;
-    if (options.hasOwnProperty("lineWidth")) PARTICLE_LINE_WIDTH = options.lineWidth;
-    if (options.hasOwnProperty("particleMultiplier")) PARTICLE_MULTIPLIER = options.particleMultiplier;
+    if (options.hasOwnProperty("minVelocity"))
+      MIN_VELOCITY_INTENSITY = options.minVelocity;
+    if (options.hasOwnProperty("maxVelocity"))
+      MAX_VELOCITY_INTENSITY = options.maxVelocity;
+    if (options.hasOwnProperty("velocityScale"))
+      VELOCITY_SCALE =
+        (options.velocityScale || 0.005) *
+        (Math.pow(window.devicePixelRatio, 1 / 3) || 1);
+    if (options.hasOwnProperty("particleAge"))
+      MAX_PARTICLE_AGE = options.particleAge;
+    if (options.hasOwnProperty("lineWidth"))
+      PARTICLE_LINE_WIDTH = options.lineWidth;
+    if (options.hasOwnProperty("particleMultiplier"))
+      PARTICLE_MULTIPLIER = options.particleMultiplier;
     if (options.hasOwnProperty("opacity")) OPACITY = +options.opacity;
     if (options.hasOwnProperty("frameRate")) FRAME_RATE = options.frameRate;
     FRAME_TIME = 1000 / FRAME_RATE;
   }; // interpolation for vectors like wind (u,v,m)
 
-
-  var bilinearInterpolateVector = function bilinearInterpolateVector(x, y, g00, g10, g01, g11) {
+  var bilinearInterpolateVector = function bilinearInterpolateVector(
+    x,
+    y,
+    g00,
+    g10,
+    g01,
+    g11
+  ) {
     var rx = 1 - x;
     var ry = 1 - y;
     var a = rx * ry,
-        b = x * ry,
-        c = rx * y,
-        d = x * y;
+      b = x * ry,
+      c = rx * y,
+      d = x * y;
     var u = g00[0] * a + g10[0] * b + g01[0] * c + g11[0] * d;
     var v = g00[1] * a + g10[1] * b + g01[1] * c + g11[1] * d;
     return [u, v, Math.sqrt(u * u + v * v)];
@@ -530,23 +633,27 @@ var Windy = function Windy(params) {
 
   var createWindBuilder = function createWindBuilder(uComp, vComp) {
     var uData = uComp.data,
-        vData = vComp.data;
+      vData = vComp.data;
     return {
       header: uComp.header,
       //recipe: recipeFor("wind-" + uComp.header.surface1Value),
       data: function data(i) {
         return [uData[i], vData[i]];
       },
-      interpolate: bilinearInterpolateVector
+      interpolate: bilinearInterpolateVector,
     };
   };
 
   var createBuilder = function createBuilder(data) {
     var uComp = null,
-        vComp = null,
-        scalar = null;
+      vComp = null,
+      scalar = null;
     data.forEach(function (record) {
-      switch (record.header.parameterCategory + "," + record.header.parameterNumber) {
+      switch (
+        record.header.parameterCategory +
+        "," +
+        record.header.parameterNumber
+      ) {
         case "1,2":
         case "2,2":
           uComp = record;
@@ -567,13 +674,20 @@ var Windy = function Windy(params) {
   var buildGrid = function buildGrid(data, callback) {
     var supported = true;
     if (data.length < 2) supported = false;
-    if (!supported) console.log("Windy Error: data must have at least two components (u,v)");
+    if (!supported)
+      console.log("Windy Error: data must have at least two components (u,v)");
     builder = createBuilder(data);
     var header = builder.header;
-    if (header.hasOwnProperty("gridDefinitionTemplate") && header.gridDefinitionTemplate != 0) supported = false;
+    if (
+      header.hasOwnProperty("gridDefinitionTemplate") &&
+      header.gridDefinitionTemplate != 0
+    )
+      supported = false;
 
     if (!supported) {
-      console.log("Windy Error: Only data with Latitude_Longitude coordinates is supported");
+      console.log(
+        "Windy Error: Only data with Latitude_Longitude coordinates is supported"
+      );
     }
 
     supported = true; // reset for futher checks
@@ -589,8 +703,8 @@ var Windy = function Windy(params) {
 
     if (header.hasOwnProperty("scanMode")) {
       var scanModeMask = header.scanMode.toString(2);
-      scanModeMask = ('0' + scanModeMask).slice(-8);
-      var scanModeMaskArray = scanModeMask.split('').map(Number).map(Boolean);
+      scanModeMask = ("0" + scanModeMask).slice(-8);
+      var scanModeMaskArray = scanModeMask.split("").map(Number).map(Boolean);
       if (scanModeMaskArray[0]) Δλ = -Δλ;
       if (scanModeMaskArray[1]) Δφ = -Δφ;
       if (scanModeMaskArray[2]) supported = false;
@@ -599,7 +713,12 @@ var Windy = function Windy(params) {
       if (scanModeMaskArray[5]) supported = false;
       if (scanModeMaskArray[6]) supported = false;
       if (scanModeMaskArray[7]) supported = false;
-      if (!supported) console.log("Windy Error: Data with scanMode: " + header.scanMode + " is not supported.");
+      if (!supported)
+        console.log(
+          "Windy Error: Data with scanMode: " +
+            header.scanMode +
+            " is not supported."
+        );
     }
 
     date = new Date(header.refTime);
@@ -627,7 +746,7 @@ var Windy = function Windy(params) {
 
     callback({
       date: date,
-      interpolate: interpolate
+      interpolate: interpolate,
     });
   };
   /**
@@ -637,7 +756,6 @@ var Windy = function Windy(params) {
    * @returns {Object}
    */
 
-
   var interpolate = function interpolate(λ, φ) {
     if (!grid) return null;
     var i = floorMod(λ - λ0, 360) / Δλ; // calculate longitude index in wrapped range [0, 360)
@@ -645,12 +763,12 @@ var Windy = function Windy(params) {
     var j = (φ0 - φ) / Δφ; // calculate latitude index in direction +90 to -90
 
     var fi = Math.floor(i),
-        ci = fi + 1;
+      ci = fi + 1;
     var fj = Math.floor(j),
-        cj = fj + 1;
+      cj = fj + 1;
     var row;
 
-    if (row = grid[fj]) {
+    if ((row = grid[fj])) {
       var g00 = row[fi];
       var g10 = row[ci];
 
@@ -671,7 +789,6 @@ var Windy = function Windy(params) {
    * @returns {Boolean} true if the specified value is not null and not undefined.
    */
 
-
   var isValue = function isValue(x) {
     return x !== null && x !== undefined;
   };
@@ -680,14 +797,12 @@ var Windy = function Windy(params) {
    *          of negative numbers. See http://en.wikipedia.org/wiki/Modulo_operation.
    */
 
-
   var floorMod = function floorMod(a, n) {
     return a - n * Math.floor(a / n);
   };
   /**
    * @returns {Number} the value x clamped to the range [low, high].
    */
-
 
   var clamp = function clamp(x, range) {
     return Math.max(range[0], Math.min(x, range[1]));
@@ -696,15 +811,15 @@ var Windy = function Windy(params) {
    * @returns {Boolean} true if agent is probably a mobile device. Don't really care if this is accurate.
    */
 
-
   var isMobile = function isMobile() {
-    return /android|blackberry|iemobile|ipad|iphone|ipod|opera mini|webos/i.test(navigator.userAgent);
+    return /android|blackberry|iemobile|ipad|iphone|ipod|opera mini|webos/i.test(
+      navigator.userAgent
+    );
   };
   /**
    * Calculate distortion of the wind vector caused by the shape of the projection at point (x, y). The wind
    * vector is modified in place and returned by this function.
    */
-
 
   var distort = function distort(projection, λ, φ, x, y, scale, wind) {
     var u = wind[0] * scale;
@@ -728,8 +843,13 @@ var Windy = function Windy(params) {
     var pφ = project(φ + hφ, λ); // Meridian scale factor (see Snyder, equation 4-3), where R = 1. This handles issue where length of 1º λ
     // changes depending on φ. Without this, there is a pinching effect at the poles.
 
-    var k = Math.cos(φ / 360 * τ);
-    return [(pλ[0] - x) / hλ / k, (pλ[1] - y) / hλ / k, (pφ[0] - x) / hφ, (pφ[1] - y) / hφ];
+    var k = Math.cos((φ / 360) * τ);
+    return [
+      (pλ[0] - x) / hλ / k,
+      (pλ[1] - y) / hλ / k,
+      (pφ[0] - x) / hφ,
+      (pφ[1] - y) / hφ,
+    ];
   };
 
   var createField = function createField(columns, bounds, callback) {
@@ -739,10 +859,9 @@ var Windy = function Windy(params) {
      */
     function field(x, y) {
       var column = columns[Math.round(x)];
-      return column && column[Math.round(y)] || NULL_WIND_VECTOR;
+      return (column && column[Math.round(y)]) || NULL_WIND_VECTOR;
     } // Frees the massive "columns" array for GC. Without this, the array is leaked (in Chrome) each time a new
     // field is interpolated because the field closure's context is leaked, for reasons that defy explanation.
-
 
     field.release = function () {
       columns = [];
@@ -780,12 +899,12 @@ var Windy = function Windy(params) {
       xMax: width,
       yMax: yMax,
       width: width,
-      height: height
+      height: height,
     };
   };
 
   var deg2rad = function deg2rad(deg) {
-    return deg / 180 * Math.PI;
+    return (deg / 180) * Math.PI;
   };
 
   var invert = function invert(x, y, windy) {
@@ -798,7 +917,12 @@ var Windy = function Windy(params) {
     return [xy.x, xy.y];
   };
 
-  var interpolateField = function interpolateField(grid, bounds, extent, callback) {
+  var interpolateField = function interpolateField(
+    grid,
+    bounds,
+    extent,
+    callback
+  ) {
     var projection = {}; // map.crs used instead
 
     var mapArea = (extent.south - extent.north) * (extent.west - extent.east);
@@ -814,7 +938,7 @@ var Windy = function Windy(params) {
 
         if (coord) {
           var λ = coord[0],
-              φ = coord[1];
+            φ = coord[1];
 
           if (isFinite(λ)) {
             var wind = grid.interpolate(λ, φ);
@@ -854,17 +978,28 @@ var Windy = function Windy(params) {
     function windIntensityColorScale(min, max) {
       colorScale.indexFor = function (m) {
         // map velocity speed to a style
-        return Math.max(0, Math.min(colorScale.length - 1, Math.round((m - min) / (max - min) * (colorScale.length - 1))));
+        return Math.max(
+          0,
+          Math.min(
+            colorScale.length - 1,
+            Math.round(((m - min) / (max - min)) * (colorScale.length - 1))
+          )
+        );
       };
 
       return colorScale;
     }
 
-    var colorStyles = windIntensityColorScale(MIN_VELOCITY_INTENSITY, MAX_VELOCITY_INTENSITY);
+    var colorStyles = windIntensityColorScale(
+      MIN_VELOCITY_INTENSITY,
+      MAX_VELOCITY_INTENSITY
+    );
     var buckets = colorStyles.map(function () {
       return [];
     });
-    var particleCount = Math.round(bounds.width * bounds.height * PARTICLE_MULTIPLIER);
+    var particleCount = Math.round(
+      bounds.width * bounds.height * PARTICLE_MULTIPLIER
+    );
 
     if (isMobile()) {
       particleCount *= PARTICLE_REDUCTION;
@@ -874,9 +1009,11 @@ var Windy = function Windy(params) {
     var particles = [];
 
     for (var i = 0; i < particleCount; i++) {
-      particles.push(field.randomize({
-        age: Math.floor(Math.random() * MAX_PARTICLE_AGE) + 0
-      }));
+      particles.push(
+        field.randomize({
+          age: Math.floor(Math.random() * MAX_PARTICLE_AGE) + 0,
+        })
+      );
     }
 
     function evolve() {
@@ -952,7 +1089,7 @@ var Windy = function Windy(params) {
       var delta = now - then;
 
       if (delta > FRAME_TIME) {
-        then = now - delta % FRAME_TIME;
+        then = now - (delta % FRAME_TIME);
         evolve();
         draw();
       }
@@ -966,17 +1103,22 @@ var Windy = function Windy(params) {
       east: deg2rad(extent[1][0]),
       west: deg2rad(extent[0][0]),
       width: width,
-      height: height
+      height: height,
     };
     stop(); // build grid
 
     buildGrid(gridData, function (grid) {
       // interpolateField
-      interpolateField(grid, buildBounds(bounds, width, height), mapBounds, function (bounds, field) {
-        // animate the canvas with random points
-        windy.field = field;
-        animate(bounds, field);
-      });
+      interpolateField(
+        grid,
+        buildBounds(bounds, width, height),
+        mapBounds,
+        function (bounds, field) {
+          // animate the canvas with random points
+          windy.field = field;
+          animate(bounds, field);
+        }
+      );
     });
   };
 
@@ -992,7 +1134,7 @@ var Windy = function Windy(params) {
     createField: createField,
     interpolatePoint: interpolate,
     setData: setData,
-    setOptions: setOptions
+    setOptions: setOptions,
   };
   return windy;
 };
